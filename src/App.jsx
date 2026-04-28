@@ -2,6 +2,45 @@ import React, { useState } from "react";
 
 function App() {
   const [step, setStep] = useState("home");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [documentFile, setDocumentFile] = useState(null);
+  const [error, setError] = useState("");
+
+  const goPhone = () => {
+    setError("");
+    setStep("phone");
+  };
+
+  const sendCode = () => {
+    if (phone.trim().length < 8) {
+      setError("Inserisci un numero valido.");
+      return;
+    }
+
+    setError("");
+    setStep("otp");
+  };
+
+  const verifyCode = () => {
+    if (otp.length !== 6) {
+      setError("Il codice deve essere di 6 cifre.");
+      return;
+    }
+
+    setError("");
+    setStep("document");
+  };
+
+  const sendDocument = () => {
+    if (!documentFile) {
+      setError("Carica prima il documento.");
+      return;
+    }
+
+    setError("");
+    setStep("pending");
+  };
 
   return (
     <div style={styles.container}>
@@ -18,10 +57,7 @@ function App() {
             Continua con Google
           </button>
 
-          <button
-            style={styles.phoneButton}
-            onClick={() => setStep("phone")}
-          >
+          <button style={styles.phoneButton} onClick={goPhone}>
             Continua con numero di telefono
           </button>
 
@@ -42,13 +78,14 @@ function App() {
           <input
             type="tel"
             placeholder="+39 333 1234567"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
             style={styles.input}
           />
 
-          <button
-            style={styles.phoneButton}
-            onClick={() => setStep("otp")}
-          >
+          {error && <p style={styles.error}>{error}</p>}
+
+          <button style={styles.phoneButton} onClick={sendCode}>
             Invia codice
           </button>
 
@@ -63,24 +100,35 @@ function App() {
           <h2 style={styles.heading}>Codice di verifica</h2>
 
           <p style={styles.subtitle}>
-            Inserisci il codice ricevuto via SMS
+            Inserisci il codice ricevuto via SMS al numero:
+            <br />
+            <strong>{phone}</strong>
           </p>
 
           <input
             type="text"
             placeholder="123456"
             maxLength="6"
+            value={otp}
+            onChange={(e) =>
+              setOtp(e.target.value.replace(/\D/g, ""))
+            }
             style={styles.input}
           />
 
-          <button
-            style={styles.phoneButton}
-            onClick={() => setStep("document")}
-          >
+          {error && <p style={styles.error}>{error}</p>}
+
+          <button style={styles.phoneButton} onClick={verifyCode}>
             Verifica codice
           </button>
 
-          <p style={styles.back} onClick={() => setStep("phone")}>
+          <p
+            style={styles.back}
+            onClick={() => {
+              setError("");
+              setStep("phone");
+            }}
+          >
             ← Cambia numero
           </p>
         </div>
@@ -91,23 +139,36 @@ function App() {
           <h2 style={styles.heading}>Verifica documento</h2>
 
           <p style={styles.subtitle}>
-            Carica il documento per la verifica manuale
+            Carica una foto o un PDF del documento.  
+            Lo staff controllerà manualmente i dati.
           </p>
 
           <input
             type="file"
             accept="image/*,.pdf"
+            onChange={(e) => setDocumentFile(e.target.files[0])}
             style={styles.fileInput}
           />
 
-          <button
-            style={styles.phoneButton}
-            onClick={() => setStep("pending")}
-          >
+          {documentFile && (
+            <p style={styles.success}>
+              File selezionato: {documentFile.name}
+            </p>
+          )}
+
+          {error && <p style={styles.error}>{error}</p>}
+
+          <button style={styles.phoneButton} onClick={sendDocument}>
             Invia documento
           </button>
 
-          <p style={styles.back} onClick={() => setStep("otp")}>
+          <p
+            style={styles.back}
+            onClick={() => {
+              setError("");
+              setStep("otp");
+            }}
+          >
             ← Torna al codice
           </p>
         </div>
@@ -120,12 +181,19 @@ function App() {
           <h2 style={styles.heading}>Richiesta inviata</h2>
 
           <p style={styles.subtitle}>
-            Il tuo documento sarà controllato manualmente dallo staff.
+            Il documento è stato inviato allo staff.
+            Riceverai conferma appena la verifica sarà approvata.
           </p>
 
           <button
             style={styles.phoneButton}
-            onClick={() => setStep("home")}
+            onClick={() => {
+              setStep("home");
+              setPhone("");
+              setOtp("");
+              setDocumentFile(null);
+              setError("");
+            }}
           >
             Torna alla home
           </button>
@@ -191,7 +259,8 @@ const styles = {
     fontSize: "15px",
     fontWeight: "bold",
     backgroundColor: "white",
-    color: "#111"
+    color: "#111",
+    cursor: "pointer"
   },
   phoneButton: {
     width: "100%",
@@ -202,7 +271,8 @@ const styles = {
     fontWeight: "bold",
     backgroundColor: "#00c853",
     color: "white",
-    marginTop: "10px"
+    marginTop: "10px",
+    cursor: "pointer"
   },
   input: {
     width: "100%",
@@ -225,6 +295,17 @@ const styles = {
     marginBottom: "8px",
     fontSize: "14px",
     color: "white"
+  },
+  error: {
+    color: "#ff6b6b",
+    fontSize: "13px",
+    marginTop: "4px"
+  },
+  success: {
+    color: "#00ff99",
+    fontSize: "13px",
+    marginTop: "8px",
+    wordBreak: "break-word"
   },
   back: {
     marginTop: "18px",
