@@ -1,34 +1,56 @@
-import React from "react";
+import React, { useState } from "react";
 
 function App() {
-  return (
-    <div style={{
-      backgroundColor: "#0f0f0f",
-      color: "white",
-      height: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center",
-      textAlign: "center"
-    }}>
-      <h1 style={{ fontSize: "42px" }}>QR Dynamic</h1>
-      <p>Accesso eventi esclusivi</p>
+  const [step, setStep] = useState("home");
 
-      <button style={{
-        marginTop: "20px",
-        padding: "12px 24px",
-        borderRadius: "14px",
-        border: "none",
-        backgroundColor: "#00c853",
-        color: "white",
-        fontSize: "16px",
-        fontWeight: "bold"
-      }}>
-        Registrati
-      </button>
+  return (
+    <div style={styles.container}>
+      {step === "home" && (
+        <div style={styles.card}>
+          <div style={styles.logo}>♪</div>
+
+          <h1 style={styles.title}>QR Dynamic</h1>
+          <p style={styles.subtitle}>
+            Accesso rapido agli eventi esclusivi
+          </p>
+
+          <button style={styles.googleButton}>
+            Continua con Google
+          </button>
+
+          <button
+            style={styles.phoneButton}
+            onClick={() => setStep("phone")}
+          >
+            Continua con numero di telefono
+          </button>
+        </div>
+      )}
+
+      {step === "phone" && (
+        <div style={styles.card}>
+          <h2>Inserisci numero</h2>
+
+          <input
+            type="tel"
+            placeholder="+39 333 1234567"
+            style={styles.input}
+          />
+
+          <button style={styles.phoneButton}>
+            Invia codice
+          </button>
+
+          <p style={styles.back} onClick={() => setStep("home")}>
+            ← Torna indietro
+          </p>
+        </div>
+      )}
     </div>
   );
 }
 
-export default App;
+const styles = {
+  container: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #090
