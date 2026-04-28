@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { QRCodeCanvas } from "qrcode.react";
 
 function App() {
   const [step, setStep] = useState("home");
@@ -17,7 +18,6 @@ function App() {
       setError("Inserisci un numero valido.");
       return;
     }
-
     setError("");
     setStep("otp");
   };
@@ -27,7 +27,6 @@ function App() {
       setError("Il codice deve essere di 6 cifre.");
       return;
     }
-
     setError("");
     setStep("document");
   };
@@ -37,9 +36,8 @@ function App() {
       setError("Carica prima il documento.");
       return;
     }
-
     setError("");
-    setStep("pending");
+    setStep("qr");
   };
 
   return (
@@ -53,8 +51,8 @@ function App() {
             Accesso rapido agli eventi esclusivi
           </p>
 
-          <button style={styles.googleButton}>
-            Continua con Google
+          <button style={styles.googleButton} onClick={goPhone}>
+            Registrati
           </button>
 
           <button style={styles.phoneButton} onClick={goPhone}>
@@ -70,10 +68,6 @@ function App() {
       {step === "phone" && (
         <div style={styles.card}>
           <h2 style={styles.heading}>Inserisci numero</h2>
-
-          <p style={styles.subtitle}>
-            Ti invieremo un codice di verifica
-          </p>
 
           <input
             type="tel"
@@ -99,12 +93,6 @@ function App() {
         <div style={styles.card}>
           <h2 style={styles.heading}>Codice di verifica</h2>
 
-          <p style={styles.subtitle}>
-            Inserisci il codice ricevuto via SMS al numero:
-            <br />
-            <strong>{phone}</strong>
-          </p>
-
           <input
             type="text"
             placeholder="123456"
@@ -122,13 +110,7 @@ function App() {
             Verifica codice
           </button>
 
-          <p
-            style={styles.back}
-            onClick={() => {
-              setError("");
-              setStep("phone");
-            }}
-          >
+          <p style={styles.back} onClick={() => setStep("phone")}>
             ← Cambia numero
           </p>
         </div>
@@ -138,11 +120,6 @@ function App() {
         <div style={styles.card}>
           <h2 style={styles.heading}>Verifica documento</h2>
 
-          <p style={styles.subtitle}>
-            Carica una foto o un PDF del documento.  
-            Lo staff controllerà manualmente i dati.
-          </p>
-
           <input
             type="file"
             accept="image/*,.pdf"
@@ -150,50 +127,34 @@ function App() {
             style={styles.fileInput}
           />
 
-          {documentFile && (
-            <p style={styles.success}>
-              File selezionato: {documentFile.name}
-            </p>
-          )}
-
           {error && <p style={styles.error}>{error}</p>}
 
           <button style={styles.phoneButton} onClick={sendDocument}>
             Invia documento
           </button>
 
-          <p
-            style={styles.back}
-            onClick={() => {
-              setError("");
-              setStep("otp");
-            }}
-          >
+          <p style={styles.back} onClick={() => setStep("otp")}>
             ← Torna al codice
           </p>
         </div>
       )}
 
-      {step === "pending" && (
+      {step === "qr" && (
         <div style={styles.card}>
-          <div style={styles.logo}>✓</div>
+          <h2 style={styles.heading}>Il tuo QR</h2>
 
-          <h2 style={styles.heading}>Richiesta inviata</h2>
+          <QRCodeCanvas
+            value={phone + "-" + Date.now()}
+            size={200}
+          />
 
           <p style={styles.subtitle}>
-            Il documento è stato inviato allo staff.
-            Riceverai conferma appena la verifica sarà approvata.
+            Mostralo all’ingresso
           </p>
 
           <button
             style={styles.phoneButton}
-            onClick={() => {
-              setStep("home");
-              setPhone("");
-              setOtp("");
-              setDocumentFile(null);
-              setError("");
-            }}
+            onClick={() => setStep("home")}
           >
             Torna alla home
           </button>
@@ -211,8 +172,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     padding: "20px",
-    color: "white",
-    fontFamily: "Arial, sans-serif"
+    color: "white"
   },
   card: {
     width: "100%",
@@ -220,103 +180,75 @@ const styles = {
     backgroundColor: "rgba(255,255,255,0.08)",
     borderRadius: "28px",
     padding: "32px 24px",
-    textAlign: "center",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.45)"
+    textAlign: "center"
   },
   logo: {
     width: "76px",
     height: "76px",
     margin: "0 auto 18px",
     borderRadius: "50%",
-    background: "linear-gradient(135deg, #00ff99, #00c853)",
-    color: "#050505",
+    background: "#00c853",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    fontSize: "42px",
-    fontWeight: "bold"
+    fontSize: "42px"
   },
   title: {
-    fontSize: "34px",
-    margin: "0 0 10px"
+    fontSize: "32px"
   },
   heading: {
-    fontSize: "26px",
-    margin: "0 0 10px"
+    fontSize: "24px",
+    marginBottom: "10px"
   },
   subtitle: {
     fontSize: "14px",
     opacity: 0.8,
-    marginBottom: "22px",
-    lineHeight: "1.5"
+    marginBottom: "20px"
   },
   googleButton: {
     width: "100%",
     padding: "14px",
-    borderRadius: "16px",
+    borderRadius: "14px",
     border: "none",
-    marginBottom: "12px",
-    fontSize: "15px",
-    fontWeight: "bold",
+    marginBottom: "10px",
     backgroundColor: "white",
-    color: "#111",
-    cursor: "pointer"
+    color: "#111"
   },
   phoneButton: {
     width: "100%",
     padding: "14px",
-    borderRadius: "16px",
+    borderRadius: "14px",
     border: "none",
-    fontSize: "15px",
-    fontWeight: "bold",
     backgroundColor: "#00c853",
     color: "white",
-    marginTop: "10px",
-    cursor: "pointer"
+    marginTop: "10px"
   },
   input: {
     width: "100%",
-    boxSizing: "border-box",
     padding: "14px",
-    borderRadius: "14px",
+    borderRadius: "12px",
     border: "none",
-    marginTop: "6px",
-    marginBottom: "8px",
-    fontSize: "16px",
-    outline: "none"
+    marginBottom: "10px"
   },
   fileInput: {
     width: "100%",
-    boxSizing: "border-box",
-    padding: "14px",
-    borderRadius: "14px",
-    border: "1px solid rgba(255,255,255,0.25)",
-    marginTop: "6px",
-    marginBottom: "8px",
-    fontSize: "14px",
-    color: "white"
+    padding: "10px",
+    marginTop: "10px"
   },
   error: {
-    color: "#ff6b6b",
-    fontSize: "13px",
-    marginTop: "4px"
-  },
-  success: {
-    color: "#00ff99",
-    fontSize: "13px",
-    marginTop: "8px",
-    wordBreak: "break-word"
+    color: "red",
+    fontSize: "13px"
   },
   back: {
-    marginTop: "18px",
+    marginTop: "10px",
     fontSize: "13px",
     opacity: 0.7,
     cursor: "pointer"
   },
   footer: {
-    marginTop: "22px",
+    marginTop: "15px",
     fontSize: "12px",
-    opacity: 0.65
+    opacity: 0.6
   }
 };
 
